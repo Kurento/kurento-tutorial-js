@@ -66,6 +66,7 @@ function startRecording() {
   var disableVideoButton = document.getElementById("disableVideoButton");
   var enableVideoButton  = document.getElementById("enableVideoButton");
 
+/*
   disableButton.addEventListener('click', function()
   {
     webRtcPeer.enabled = false;
@@ -91,6 +92,7 @@ function startRecording() {
   {
     webRtcPeer.videoEnabled = true;
   })
+*/
 
   function onOffer(offer) {
     console.log("Offer ...");
