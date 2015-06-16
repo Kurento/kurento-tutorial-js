@@ -169,45 +169,53 @@ function startRecording() {
 
 
 function startPlaying() {
-  kurentoClient(args.ws_uri, function(error, kurentoClient) {
-    var videoPlayer = document.getElementById('videoPlayer');
+  var videoPlayer = document.getElementById('videoPlayer');
 
-    if (error) return onError(error);
+  webRtcPeer = kurentoUtils.WebRtcPeer.startRecvOnly(videoPlayer, onOffer, onError);
 
-    kurentoClient.create('MediaPipeline', function(error, pipeline) {
+  function onOffer(offer)
+  {
+    console.log("Offer...");
+
+    kurentoClient(args.ws_uri, function(error, client) {
       if (error) return onError(error);
 
-      function release(event)  {
-        pipeline.release();
-        videoPlayer.src = '';
-      }
+      client.create('MediaPipeline', function(error, pipeline) {
+        if (error) return onError(error);
 
-      pipeline.create('HttpGetEndpoint', function(error, httpGetEndpoint) {
-        if(error) return onError(error);
+        function release(event)  {
+          pipeline.release();
+          videoPlayer.src = ""
+        }
 
-        httpGetEndpoint.getUrl(function(error, url) {
-          if(error) return onError(error);
-          videoPlayer.src = url;
-        });
-
-        pipeline.create('PlayerEndpoint', {uri : file_uri}, function(error, playerEndpoint) {
+        pipeline.create('WebRtcEndpoint', function(error, webRtc) {
           if(error) return onError(error);
 
-          playerEndpoint.on('EndOfStream', release);
-
-          playerEndpoint.connect(httpGetEndpoint, function(error) {
+          webRtc.processOffer(offer, function(error, sdpAnswer){
             if(error) return onError(error);
 
-            playerEndpoint.play(function(error) {
+            webRtcPeer.processSdpAnswer(sdpAnswer);
+          });
+
+          pipeline.create('PlayerEndpoint', {uri : file_uri}, function(error, playerEndpoint) {
+            if(error) return onError(error);
+
+            playerEndpoint.on('EndOfStream', release);
+
+            playerEndpoint.connect(webRtc, function(error) {
               if(error) return onError(error);
 
-              console.log('Playing...');
+              playerEndpoint.play(function(error) {
+                if(error) return onError(error);
+
+                console.log('Playing...');
+              });
             });
           });
         });
       });
     });
-  });
+  }
 }
 
 function onError(error) {
