@@ -1,17 +1,16 @@
 /*
-* (C) Copyright 2014 Kurento (http://kurento.org/)
-*
-* All rights reserved. This program and the accompanying materials
-* are made available under the terms of the GNU Lesser General Public License
-* (LGPL) version 2.1 which accompanies this distribution, and is available at
-* http://www.gnu.org/licenses/lgpl-2.1.html
-*
-* This library is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-* Lesser General Public License for more details.
-*
-*/
+ * (C) Copyright 2014-2015 Kurento (http://kurento.org/)
+ *
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the GNU Lesser General Public License (LGPL)
+ * version 2.1 which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/lgpl-2.1.html
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ */
 
 function getopts(args, opts)
 {
@@ -43,173 +42,174 @@ const file_uri = 'file:///tmp/recorderScreen.webm'; //file to be stored in media
 
 
 window.addEventListener('load', function(event) {
-	var startRecordButton = document.getElementById('startRecordButton');
-	var playButton = document.getElementById('startPlayButton');
-	var stopPlayButton = document.getElementById('stopPlayButton');
+  var startRecordButton = document.getElementById('startRecordButton');
+  var playButton = document.getElementById('startPlayButton');
+  var stopPlayButton = document.getElementById('stopPlayButton');
 
-	var videoPlayer = document.getElementById('videoPlayer');
+  var videoPlayer = document.getElementById('videoPlayer');
 
-	startRecordButton.addEventListener('click', startRecording);
-	playButton.addEventListener('click', startPlaying);
-	stopPlayButton.addEventListener('click', function(event){
-		videoPlayer.src="";
-	})
+  startRecordButton.addEventListener('click', startRecording);
+  playButton.addEventListener('click', startPlaying);
+  stopPlayButton.addEventListener('click', function(event){
+    videoPlayer.src="";
+  })
 });
 
 function startRecording() {
-	console.log("onClick");
-	var videoInput = document.getElementById("videoInput");
-	var videoOutput = document.getElementById("videoOutput");
+  console.log("onClick");
+  var videoInput = document.getElementById("videoInput");
+  var videoOutput = document.getElementById("videoOutput");
 
-	var width, height;
-	var resolution = document.getElementById('resolution').value
-	switch(resolution)
-	{
-		case 'VGA':
-			width = 640;
-			height = 480;
-		break;
-		case 'HD':
-			width = 1280;
-			height = 720;
-		break;
-		case 'Full HD':
-			width = 1920;
-			height = 1080;
-		break;
-
-		default:
-			return console.error('Unknown resolution',resolution)
-	}
-
-	var selectSource = document.getElementById('selectSource')
-	var isWebcam = selectSource.value == 'Webcam'
-	var constraints =
-	{
-		audio : isWebcam,
-		video : {
-			mandatory: {
-				maxWidth: width,
-				maxHeight: height,
-				maxFrameRate : 15,
-				minFrameRate: 15
-			}
-		}
-	};
-
-	if(!isWebcam)
+  var width, height;
+  var resolution = document.getElementById('resolution').value
+  switch(resolution)
   {
-    constraints.video.mediaSource = 'screen'
-    constraints.video.chromeMediaSource = 'screen'
+    case 'VGA':
+      width = 640;
+      height = 480;
+    break;
+    case 'HD':
+      width = 1280;
+      height = 720;
+    break;
+    case 'Full HD':
+      width = 1920;
+      height = 1080;
+    break;
+
+    default:
+      return console.error('Unknown resolution',resolution)
   }
 
-	webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
-			onOffer, onError, constraints);
+  var selectSource = document.getElementById('selectSource')
+  var isWebcam = selectSource.value == 'Webcam'
+  var constraints =
+  {
+    audio : isWebcam,
+    video : {
+      mandatory: {
+        maxWidth: width,
+        maxHeight: height,
+        maxFrameRate : 15,
+        minFrameRate: 15
+      }
+    }
+  };
 
-	function onOffer(offer) {
-		console.log("Offer ...");
+  if(!isWebcam)
+  {
+//    constraints.video.mandatory.mediaSource = 'desktop'
+    constraints.video.mandatory.chromeMediaSource = 'screen'
+  }
 
-		kurentoClient(args.ws_uri, function(error, client) {
-			if (error) return onError(error);
+  webRtcPeer = kurentoUtils.WebRtcPeer.startSendRecv(videoInput, videoOutput,
+      onOffer, onError, constraints);
 
-			client.create('MediaPipeline', function(error, pipeline) {
-				if (error) return onError(error);
-				console.log("Got MediaPipeline");
+  function onOffer(offer) {
+    console.log("Offer...");
 
-				pipeline.create('WebRtcEndpoint', function(error, webRtc) {
-					if (error) return onError(error);
-					console.log("Got WebRtcEndpoint");
+    kurentoClient(args.ws_uri, function(error, client) {
+      if (error) return onError(error);
 
-					// Set video loopback
-					webRtc.connect(webRtc, function(error) {
-						if (error) return onError(error);
-						console.log("Second connect");
-					});
+      client.create('MediaPipeline', function(error, pipeline) {
+        if (error) return onError(error);
+        console.log("Got MediaPipeline");
 
-					webRtc.processOffer(offer, function(error, answer) {
-						if (error) return onError(error);
-						console.log("offer");
+        pipeline.create('WebRtcEndpoint', function(error, webRtc) {
+          if (error) return onError(error);
+          console.log("Got WebRtcEndpoint");
 
-						webRtcPeer.processSdpAnswer(answer);
-					});
+          // Set video loopback
+          webRtc.connect(webRtc, function(error) {
+            if (error) return onError(error);
+            console.log("Second connect");
+          });
 
-					pipeline.create('RecorderEndpoint', {uri : file_uri}, function(error, recorder) {
-						if (error) return onError(error);
-						console.log("Got RecorderEndpoint");
+          webRtc.processOffer(offer, function(error, answer) {
+            if (error) return onError(error);
+            console.log("offer");
 
-						webRtc.connect(recorder, function(error) {
-							if (error) return onError(error);
-							console.log("Connected");
-						});
+            webRtcPeer.processSdpAnswer(answer);
+          });
 
-						recorder.record(function(error) {
-							if (error) return onError(error);
-							console.log("recording");
-						});
+          pipeline.create('RecorderEndpoint', {uri : file_uri}, function(error, recorder) {
+            if (error) return onError(error);
+            console.log("Got RecorderEndpoint");
 
-						var stopRecorderButton = document.getElementById("stopRecordButton");
+            webRtc.connect(recorder, function(error) {
+              if (error) return onError(error);
+              console.log("Connected");
+            });
 
-						function stopRecording(event){
-							recorder.stop();
-							pipeline.release();
-							webRtcPeer.dispose();
+            recorder.record(function(error) {
+              if (error) return onError(error);
+              console.log("recording");
+            });
 
-							videoInput.src = "";
-							videoOutput.src = "";
+            var stopRecorderButton = document.getElementById("stopRecordButton");
 
-							this.removeEventListener('click', stopRecording);
-						}
+            function stopRecording(event){
+              recorder.stop();
+              pipeline.release();
+              webRtcPeer.dispose();
 
-						stopRecorderButton.addEventListener("click", stopRecording);
-					});
-				});
-			});
-		});
-	}
+              videoInput.src = "";
+              videoOutput.src = "";
+
+              this.removeEventListener('click', stopRecording);
+            }
+
+            stopRecorderButton.addEventListener("click", stopRecording);
+          });
+        });
+      });
+    });
+  }
 }
 
 
 function startPlaying() {
-	kurentoClient(args.ws_uri, function(error, kurentoClient) {
-		var videoPlayer = document.getElementById('videoPlayer');
+  kurentoClient(args.ws_uri, function(error, kurentoClient) {
+    var videoPlayer = document.getElementById('videoPlayer');
 
-		if (error) return onError(error);
+    if (error) return onError(error);
 
-		kurentoClient.create('MediaPipeline', function(error, pipeline) {
-			if (error) return onError(error);
+    kurentoClient.create('MediaPipeline', function(error, pipeline) {
+      if (error) return onError(error);
 
-			function release(event)	{
-				pipeline.release();
-				videoPlayer.src = '';
-			}
+      function release(event)  {
+        pipeline.release();
+        videoPlayer.src = '';
+      }
 
-			pipeline.create('HttpGetEndpoint', function(error, httpGetEndpoint) {
-				if(error) return onError(error);
+      pipeline.create('HttpGetEndpoint', function(error, httpGetEndpoint) {
+        if(error) return onError(error);
 
-				pipeline.create('PlayerEndpoint', {uri : file_uri}, function(error, playerEndpoint) {
-					if(error) return onError(error);
-					playerEndpoint.connect(httpGetEndpoint, function(error) {
-						if(error) return onError(error);
+        httpGetEndpoint.getUrl(function(error, url) {
+          if(error) return onError(error);
+          videoPlayer.src = url;
+        });
 
-						httpGetEndpoint.getUrl(function(error, url) {
-							if(error) return onError(error);
-							videoPlayer.src = url;
-						});
+        pipeline.create('PlayerEndpoint', {uri : file_uri}, function(error, playerEndpoint) {
+          if(error) return onError(error);
 
-						playerEndpoint.on('EndOfStream', release);
+          playerEndpoint.on('EndOfStream', release);
 
-						playerEndpoint.play(function(error) {
-							if(error) return onError(error);
+          playerEndpoint.connect(httpGetEndpoint, function(error) {
+            if(error) return onError(error);
 
-							console.log('Playing ...');
-						});
-					});
-				});
-			});
-		});
-	});
+            playerEndpoint.play(function(error) {
+              if(error) return onError(error);
+
+              console.log('Playing...');
+            });
+          });
+        });
+      });
+    });
+  });
 }
 
 function onError(error) {
-	console.log(error);
+  console.log(error);
 }
