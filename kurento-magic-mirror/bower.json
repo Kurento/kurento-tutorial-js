@@ -1,16 +1,58 @@
 {
   "name": "kurento-magic-mirror",
-  "version": "6.6.1",
-  "description": "Kurento Browser JavaScript Tutorial 2: Magic Mirror",
-  "authors": [
-    "Kurento <info@kurento.org>"
+  "version": "6.7.3-dev",
+  "description": "Kurento Browser JavaScript Tutorial: Magic Mirror",
+  "keywords": [
+    "kurento",
+    "mcu",
+    "sfu",
+    "rpc",
+    "mediaserver",
+    "pipe",
+    "audio",
+    "video",
+    "media",
+    "recording",
+    "stream",
+    "streaming",
+    "videoconference",
+    "broadcast",
+    "multicast",
+    "client",
+    "server",
+    "browser",
+    "chrome",
+    "edge",
+    "firefox",
+    "safari",
+    "webrtc",
+    "datachannel",
+    "sdp",
+    "ice",
+    "stun",
+    "turn",
+    "h264",
+    "h.264",
+    "opus",
+    "vp8",
+    "rtp",
+    "srtp",
+    "rtsp"
   ],
+  "homepage": "https://www.kurento.org",
+  "license": "Apache-2.0",
+  "authors": [
+    "Kurento <openvidu@gmail.com> (https://www.kurento.org)",
+    "Kurento Community <kurento@googlegroups.com> (https://www.kurento.org)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kurento/kurento-tutorial-js.git"
+  },
   "main": "index.html",
   "moduleType": [
     "globals"
   ],
-  "license": "ALv2",
-  "homepage": "http://www.kurento.org/",
   "private": true,
   "ignore": [
     "**/.*",
@@ -24,7 +66,7 @@
     "bootstrap": "~3.3.0",
     "demo-console": "1.5.1",
     "ekko-lightbox": "~3.3.0",
-    "kurento-client": "6.6.0",
-    "kurento-utils": "6.6.2"
+    "kurento-client": "master",
+    "kurento-utils": "master"
   }
 }
