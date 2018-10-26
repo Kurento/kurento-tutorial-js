@@ -1,6 +1,7 @@
 .classpath
 .project
 .settings/
+.idea/
 *~
 bower_components/
 .DS_Store
