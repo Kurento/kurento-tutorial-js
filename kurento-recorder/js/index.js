@@ -14,7 +14,7 @@
 * limitations under the License.
 *
 */
-
+ 
 function getopts(args, opts)
 {
   var result = opts.default || {};
