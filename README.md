@@ -22,7 +22,7 @@ Installation instructions
 Be sure to have installed [Node.js] and [Bower] in your system:
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_13.x | sudo -E sbash -
+curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
 sudo apt-get install -y nodejs
 sudo npm install -g bower
 ```
